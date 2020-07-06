@@ -160,44 +160,59 @@ namespace TestAPI
         {
 
             const string url = "https://export.cloud.getshopster.net/adapp/campaigns/create_with_roll_table/";
-            const string fileName = "test106.csv";
+            const string fileName = "test105.csv";
 
             
             using (var content = new MultipartFormDataContent())
             {
                 content.Headers.ContentType.MediaType = "multipart/form-data";
-                Stream fileStream = System.IO.File.OpenRead(@"C:\Users\" + fileName);
-
-                var values = new[]
+                using (var fileStream = new FileStream(@"C:\--\" + fileName, FileMode.Open))
                 {
-                    new KeyValuePair<string, string>("name", "test.csv"),
-                    new KeyValuePair<string, string>("mailru_needs_upload", "false"),
-                    new KeyValuePair<string, string>("description", "\"\""),
-                    new KeyValuePair<string, string>("mailru_accounts", "[]"),
-                    new KeyValuePair<string, string>("yandex_needs_upload","false"),
-                    new KeyValuePair<string, string>("yandex_accounts", "[]"),
-                };
+                    Dictionary<string, string> parameters = new Dictionary<string, string>();
 
-                foreach (var keyValuePair in values)
-                {
-                    content.Add(new StringContent(keyValuePair.Value),
-                        String.Format("\"{0}\"", keyValuePair.Key));
-                }
+                    parameters.Add("name", "test345.csv");
+                    parameters.Add("mailru_needs_upload", "false");
+                    parameters.Add("description", "\"\"");
+                    parameters.Add("mailru_accounts", "[]");
+                    parameters.Add("yandex_needs_upload", "false");
+                    parameters.Add("yandex_accounts", "[]");
 
-                using (var client = new HttpClient())
-                {
-                    content.Add(new StreamContent(fileStream), fileName, fileName);
-                    client.BaseAddress = new Uri(url);
-                    client.DefaultRequestHeaders.Add("x-token", "4950fc7e-55be-44ea-8832-58ebbd0cd436");
-                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("multipart/form-data"));
-
-                    using (var massage = await client.PostAsync(url, content))
+                    foreach (var p in parameters)
                     {
-                        var result = await massage.Content.ReadAsStringAsync();
-                        Console.WriteLine(result);
+                        content.Add(new StringContent(p.Value)
+                        {
+                            Headers =
+                            {
+                                ContentDisposition = new ContentDispositionHeaderValue("form-data")
+                                {
+                                    Name = p.Key
+                                }
+                            }
+                        });
+                    }
+                    content.Add(new StreamContent(fileStream), "file", fileName);
+                    ;
+                    using (var client = new HttpClient())
+                    {
+                        var request = new HttpRequestMessage
+                        {
+                            Method = HttpMethod.Post,
+                            RequestUri = new Uri(url),
+                            Headers =
+                            {
+                                { "x-token", "4950fc7e-55be-44ea-8832-58ebbd0cd436" }
+                            },
+                            Content = content
+                        };
+                        
+
+                        using (var massage = await client.SendAsync(request))
+                        {
+                            var result = await massage.Content.ReadAsStringAsync();
+                            Console.WriteLine(result);
+                        }
                     }
                 }
-
             }
 
 
