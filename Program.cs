@@ -5,10 +5,16 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Security.Cryptography.X509Certificates;
+using System.Security.Principal;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Web;
 using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using JsonSerializer = Utf8Json.JsonSerializer;
 
 namespace TestAPI
 {
@@ -154,7 +160,41 @@ namespace TestAPI
             }
         }
 
+        public class Item
+        {
+            [JsonProperty("id")]
+            public int Id { get; set; }
 
+            [JsonProperty("progress_status")]
+            public string Progress { get; set; }
+
+            [JsonProperty("project_id")]
+            public int ProjectId { get; set; }
+
+            public Item(string progress)
+            {
+                this.Id = Id;
+                Progress = progress;
+                this.ProjectId = ProjectId;
+            }
+            [JsonConstructor]
+            public Item(int id, string progress, int projectId)
+            {
+                Id = id;
+                Progress = progress;
+                ProjectId = projectId;
+            }
+
+            public Item()
+            {
+
+            }
+
+            public int GetId()
+            {
+                return Id;
+            }
+        }
 
         static async Task Main(string[] args)
         {
@@ -162,49 +202,142 @@ namespace TestAPI
             const string url = "https://export.cloud.getshopster.net/adapp/campaigns/create_with_roll_table/";
             const string fileName = "test105.csv";
 
-            
+
+            //using (var content = new MultipartFormDataContent())
+            //{
+            //    content.Headers.ContentType.MediaType = "multipart/form-data";
+            //    using (var fileStream = new FileStream(@"C:\--\" + fileName, FileMode.Open))
+            //    {
+            //        Dictionary<string, string> parameters = new Dictionary<string, string>();
+
+            //        parameters.Add("name", "test252.csv");
+            //        parameters.Add("mailru_needs_upload", "false");
+            //        parameters.Add("description", "\"\"");
+            //        parameters.Add("mailru_accounts", "[]");
+            //        parameters.Add("yandex_needs_upload", "false");
+            //        parameters.Add("yandex_accounts", "[]");
+
+            //        foreach (var p in parameters)
+            //        {
+            //            content.Add(new StringContent(p.Value)
+            //            {
+            //                Headers =
+            //                {
+            //                    ContentDisposition = new ContentDispositionHeaderValue("form-data")
+            //                    {
+            //                        Name = p.Key
+            //                    }
+            //                }
+            //            });
+            //        }
+
+            //        content.Add(new StreamContent(fileStream), "file", fileName);
+
+            //        using (var client = new HttpClient())
+            //        {
+            //            var request = new HttpRequestMessage
+            //            {
+            //                Method = HttpMethod.Post,
+            //                RequestUri = new Uri(url),
+            //                Headers =
+            //                {
+            //                    {"x-token", "4950fc7e-55be-44ea-8832-58ebbd0cd436"}
+            //                },
+            //                Content = content
+            //            };
+
+
+            //            using (var massage = await client.SendAsync(request))
+            //            {
+            //                var result = await massage.Content.ReadAsStringAsync();
+            //                Item item = JsonConvert.DeserializeObject<Item>(result);
+            //                Console.WriteLine(item.Id);
+            //                Console.WriteLine(item.Progress);
+            //                Console.WriteLine(item.ProjectId);
+
+            //            }
+            //        }
+            //    }
+
+            //}
+
+            const string url2 = "https://export.cloud.getshopster.net/adapp/campaigns/";
+
+            //using (var content = new MultipartFormDataContent())
+            //{
+            //    content.Headers.ContentType.MediaType = "multipart/form-data";
+            //    using (var client = new HttpClient())
+            //    {
+
+            //        var request = new HttpRequestMessage
+            //        {
+            //            Method = HttpMethod.Get,
+            //            RequestUri = new Uri(url2),
+            //            Headers =
+            //                {
+            //                    {"x-token", "4950fc7e-55be-44ea-8832-58ebbd0cd436"}
+            //                },
+            //            Content = content
+            //        };
+
+
+            //        using (var massage = await client.SendAsync(request))
+            //        {
+            //            int id = 251;
+            //            var result = await massage.Content.ReadAsStringAsync();
+            //            var list = JsonSerializer.Deserialize<dynamic>(result);
+
+            //            foreach (var item in list)
+            //            {
+            //                if (item["id"] == id)
+            //                {
+            //                    Console.WriteLine(item["progress_status"]);
+            //                }
+            //            }
+            //        }
+
+            //    }
+            //}
+
+            const string url3 =
+                "https://analytics-service.client.getshopster.net/report_api/query_report/dev/outdoor_ad_campaigns_detail_table/";
+
             using (var content = new MultipartFormDataContent())
             {
                 content.Headers.ContentType.MediaType = "multipart/form-data";
-                using (var fileStream = new FileStream(@"C:\--\" + fileName, FileMode.Open))
+
+
+                Dictionary<string, string> parameters = new Dictionary<string, string>();
+
+                parameters.Add("ad_campaign_id", "247");
+
+                foreach (var p in parameters)
                 {
-                    Dictionary<string, string> parameters = new Dictionary<string, string>();
-
-                    parameters.Add("name", "test345.csv");
-                    parameters.Add("mailru_needs_upload", "false");
-                    parameters.Add("description", "\"\"");
-                    parameters.Add("mailru_accounts", "[]");
-                    parameters.Add("yandex_needs_upload", "false");
-                    parameters.Add("yandex_accounts", "[]");
-
-                    foreach (var p in parameters)
+                    content.Add(new StringContent(p.Value)
                     {
-                        content.Add(new StringContent(p.Value)
-                        {
-                            Headers =
+                        Headers =
                             {
                                 ContentDisposition = new ContentDispositionHeaderValue("form-data")
                                 {
                                     Name = p.Key
                                 }
                             }
-                        });
-                    }
-                    content.Add(new StreamContent(fileStream), "file", fileName);
-                    ;
-                    using (var client = new HttpClient())
+                    });
+                }
+
+
+                using (var client = new HttpClient())
                     {
                         var request = new HttpRequestMessage
                         {
-                            Method = HttpMethod.Post,
-                            RequestUri = new Uri(url),
+                            Method = HttpMethod.Get,
+                            RequestUri = new Uri(url3),
                             Headers =
                             {
-                                { "x-token", "4950fc7e-55be-44ea-8832-58ebbd0cd436" }
+                                {"x-token", "4950fc7e-55be-44ea-8832-58ebbd0cd436"}
                             },
                             Content = content
                         };
-                        
 
                         using (var massage = await client.SendAsync(request))
                         {
@@ -212,46 +345,50 @@ namespace TestAPI
                             Console.WriteLine(result);
                         }
                     }
-                }
+                
+
             }
 
 
-
-
-
-
-            //// Read file data
-            //    FileStream fs = new FileStream(@"c:\Users\test106.csv", FileMode.Open, FileAccess.Read);
-            //    byte[] data = new byte[fs.Length];
-            //    fs.Read(data, 0, data.Length);
-            //    fs.Close();
-
-
-            //    // Generate post objects
-            //    Dictionary<string, object> postParameters = new Dictionary<string, object>();
-            //    postParameters.Add("name", "test.csv");
-            //    postParameters.Add("mailru_needs_upload", "false");
-            //    postParameters.Add("description", "\"\"");
-            //    postParameters.Add("mailru_accounts", "[]");
-            //    postParameters.Add("yandex_needs_upload", "false");
-            //    postParameters.Add("yandex_accounts", "[]");
-            //    postParameters.Add("file", new FormUpload.FileParameter(data, "test.csv"));
-
-            //    // Create request and receive response
-            //    string postURL = "https://export.cloud.getshopster.net/adapp/campaigns/create_with_roll_table/";
-            //    string userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36";
-
-
-
-
-            //    HttpWebResponse webResponse = FormUpload.MultipartFormDataPost(postURL, userAgent, postParameters);
-            //    // Process response
-            //    using (Stream stream = webResponse.GetResponseStream())
-            //    {
-            //        StreamReader reader = new StreamReader(stream, Encoding.UTF8);
-            //        String responseString = reader.ReadToEnd();
-            //    }
-            //}
         }
     }
+
+
+
+
+
+
+    //// Read file data
+    //    FileStream fs = new FileStream(@"c:\Users\test106.csv", FileMode.Open, FileAccess.Read);
+    //    byte[] data = new byte[fs.Length];
+    //    fs.Read(data, 0, data.Length);
+    //    fs.Close();
+
+
+    //    // Generate post objects
+    //    Dictionary<string, object> postParameters = new Dictionary<string, object>();
+    //    postParameters.Add("name", "test.csv");
+    //    postParameters.Add("mailru_needs_upload", "false");
+    //    postParameters.Add("description", "\"\"");
+    //    postParameters.Add("mailru_accounts", "[]");
+    //    postParameters.Add("yandex_needs_upload", "false");
+    //    postParameters.Add("yandex_accounts", "[]");
+    //    postParameters.Add("file", new FormUpload.FileParameter(data, "test.csv"));
+
+    //    // Create request and receive response
+    //    string postURL = "https://export.cloud.getshopster.net/adapp/campaigns/create_with_roll_table/";
+    //    string userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36";
+
+
+
+
+    //    HttpWebResponse webResponse = FormUpload.MultipartFormDataPost(postURL, userAgent, postParameters);
+    //    // Process response
+    //    using (Stream stream = webResponse.GetResponseStream())
+    //    {
+    //        StreamReader reader = new StreamReader(stream, Encoding.UTF8);
+    //        String responseString = reader.ReadToEnd();
+    //    }
+    //}
 }
+
