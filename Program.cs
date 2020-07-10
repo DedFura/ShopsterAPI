@@ -1,22 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
-using System.IO.Pipes;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Net.Mime;
-using System.Security.Cryptography.X509Certificates;
-using System.Security.Principal;
 using System.Text;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using System.Web;
-using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using JsonSerializer = Utf8Json.JsonSerializer;
 
 namespace TestAPI {
@@ -163,7 +153,7 @@ namespace TestAPI {
             {
                     "https://analytics-service.client.getshopster.net/report_api/query_report/dev/outdoor_ad_campaigns_ots_score",
                     "https://analytics-service.client.getshopster.net/report_api/query_report/dev/outdoor_ad_campaigns_ots_unique_score/",
-                "https://analytics-service.client.getshopster.net/report_api/query_report/dev/outdoor_ad_campaigns_detail_table",
+                    "https://analytics-service.client.getshopster.net/report_api/query_report/dev/outdoor_ad_campaigns_detail_table",
             };
 
             /*
@@ -181,6 +171,9 @@ namespace TestAPI {
 
             //var s = GetAdAnalytics(analyticsUrl, 247).Result;
             //Console.WriteLine(s);
+
+            //var t = GetDataFromAdAnalytics(s);
+            //Console.WriteLine(JsonSerializer.ToJsonString(t));
 
         }
     }
